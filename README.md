@@ -67,9 +67,3 @@ Le dernier test en fin de programme est le emergency stop, arrêt d’urgence qu
 
   // emergency stop
   CanMsg::sendMsg(prioMsg, myID, hash, 0xFF);  // Message à la centrale DCC++
-
-
-
-
-
-![image](https://github.com/Locoduino/Test_CommCan_LaBox/assets/38000184/efca6410-2e89-4300-857b-e380c1af336d)
