@@ -6,15 +6,16 @@ Ce programme ne fonctionne qu'avec une version en cours de développement du pro
 
 Ce programme fonctionne que sur ESP32.
 
-Configuration préalable :
+## Configuration préalable :
 
 Assurez-vous que vous avez sélectionné les bonnes broches pour la communication CAN. Par défaut, ce sont les broches 4 et 5 qui sont actives pour respectivement le RX et le TX.
-
+```cpp
 #define CAN_RX GPIO_NUM_22 // Choisir les broches RX et TX en fonction de votre montage
 #define CAN_TX GPIO_NUM_23
 
 Sélectionnez le débit qui correspond à votre configuration :
 static const uint32_t DESIRED_BIT_RATE = 1000UL * 1000UL;  // 1 Mb/s
+
 
 Si vous modifiez le réglage ci-dessus, il vous faudra également modifier le programme de LaBox et configurer le débit à la même valeur.
 
