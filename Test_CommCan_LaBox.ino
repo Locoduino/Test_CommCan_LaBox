@@ -30,7 +30,7 @@ struct Loco loco[3];
 #include <ACAN_ESP32.h>
 
 /* ----- CAN ----------------------*/
-#define CAN_RX GPIO_NUM_22
+#define CAN_RX GPIO_NUM_22 // Choisir les broches RX et TX en fonction de votre montage
 #define CAN_TX GPIO_NUM_23
 static const uint32_t DESIRED_BIT_RATE = 1000UL * 1000UL;  // 1 Mb/s
 
@@ -138,9 +138,9 @@ void setup() {
 
   // Exemple -> renseigner une adresse de locomotive valide
   loco[0].address = 22;
+  
   // Met LaBox power Main sur on
-  for (byte i = 0; i < 3; i++) {
-    .                                                 // Repetition du message !!! Pas forcement nécessaire
+  for (byte i = 0; i < 3; i++) {  // Repetition du message !!! Pas forcement nécessaire
       CanMsg::sendMsg(prioMsg, myID, hash, 0xFE, 1);  // Message à la centrale DCC++
     delay(100);
   }
