@@ -1,5 +1,8 @@
 # Test_CommCan_LaBox
 
+
+```cpp
+
  Le fichier Test_CommCan_LaBox.ino est un programme pour tester l'implantation du CAN et les commandes associées dans le projet LaBox de Locoduino. 
 
 Ce programme ne fonctionne qu'avec une version en cours de développement du programme qui se trouve ici : https://github.com/Locoduino/CommandStation-EX-LaBox/tree/CAN-messaging.
@@ -8,7 +11,6 @@ Ce programme fonctionne que sur ESP32.
 
 ## Configuration préalable :
 
-```cpp
 
 Assurez-vous que vous avez sélectionné les bonnes broches pour la communication CAN. Par défaut, ce sont les broches 4 et 5 qui sont actives pour respectivement le RX et le TX.
 
