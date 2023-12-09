@@ -5,13 +5,17 @@
   Christophe Bobille - Locoduino
 
   v 0.3 - 08/12/23
+  v 0.4 - 09/12/23 - Optimisation de la fonction 0xFE
+  v 0.5 - 09/12/23 - Ajout de la reception de messages en provenance de la centrale LaBox.
+                     Pour ce test, c'est la mesure de courant qui a été choisie
 */
-
-
 
 #ifndef ARDUINO_ARCH_ESP32
 #error "Select an ESP32 board"
 #endif
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 const uint8_t myID = 15;   // Identifiant de cet expéditeur au hasard
 const uint8_t hash = 127;  // hash
@@ -27,10 +31,12 @@ struct Loco {
 };
 struct Loco loco[3];
 
+void Task0(void *pvParameters);
+
 #include <ACAN_ESP32.h>
 
 /* ----- CAN ----------------------*/
-#define CAN_RX GPIO_NUM_22 // Choisir les broches RX et TX en fonction de votre montage
+#define CAN_RX GPIO_NUM_22  // Choisir les broches RX et TX en fonction de votre montage
 #define CAN_TX GPIO_NUM_23
 static const uint32_t DESIRED_BIT_RATE = 1000UL * 1000UL;  // 1 Mb/s
 
@@ -132,21 +138,41 @@ void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte dat
 
 
 
+// Lecture des informations en retour de LaBox
+void recepCan(void *pvParameter) {
+  CANMessage frameIn;
+  while (1) {
+    while (ACAN_ESP32::can.receive(frameIn)) {
+      //Serial.printf("Reception de la fonction : 0x%0X\n", (frameIn.id & 0x7F8) >> 3);
+      Serial.printf("Mesure de courant : %d\n", (frameIn.data[0] << 8) + frameIn.data[1]);
+    }
+    vTaskDelay(100 / portTICK_RATE_MS);
+  }
+}
+
+
+
+
 void setup() {
   Serial.begin(115200);
   CanMsg::setup();
 
   // Exemple -> renseigner une adresse de locomotive valide
   loco[0].address = 22;
-  
+
+  xTaskCreatePinnedToCore(&recepCan, "recepCan", 2 * 1024, NULL, 5, NULL, 0);
+
   // Met LaBox power Main sur on
-  for (byte i = 0; i < 3; i++) {  // Repetition du message !!! Pas forcement nécessaire
-      CanMsg::sendMsg(prioMsg, myID, hash, 0xFE, 1);  // Message à la centrale DCC++
-    delay(100);
+  for (byte i = 0; i < 3; i++) {                    // Repetition du message !!! Pas forcement nécessaire
+    CanMsg::sendMsg(prioMsg, myID, hash, 0xFE, 1);  // Message à la centrale DCC++
+    delay(1000);
   }
 }
 
 void loop() {
+  /*------------------------------------------------------------------
+   Serie de commandes envoyées a LaBox pour tests
+  --------------------------------------------------------------------*/
   // Arret de la locomotive
   loco[0].speed = 0;
   loco[0].direction = 1;
