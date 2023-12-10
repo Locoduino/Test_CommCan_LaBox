@@ -9,7 +9,8 @@
   v 0.5 - 09/12/23 - Ajout de la reception de messages en provenance de la centrale LaBox.
                      Pour ce test, c'est la mesure de courant qui a été choisie
   v 0.5.2 - 09/12/23 
-  v 0.5.3 - 10/12/23                  
+  v 0.5.3 - 10/12/23  
+  v 0.5.4 - 10/12/23 : Add POWERMODE::OVERLOAD                
 */
 
 #ifndef ARDUINO_ARCH_ESP32
@@ -145,10 +146,14 @@ void recepCan(void *pvParameter) {
   CANMessage frameIn;
   while (1) {
     while (ACAN_ESP32::can.receive(frameIn)) {
-     switch ((frameIn.id & 0x7F8) >> 3) {
+      switch ((frameIn.id & 0x7F8) >> 3) {
         case 0xFD:
-          Serial.printf("Power %s\n", frameIn.data[0] ? "on" : "off");
-          Serial.printf("Mesure de courant : %d\n", (frameIn.data[1] << 8) + frameIn.data[2]);
+          if (frameIn.data[0] == 2)  // OVERLOAD
+            Serial.printf("Power overload.\n");
+          else {
+            Serial.printf("Power %s\n", frameIn.data[0] ? "on" : "off");
+            Serial.printf("Mesure de courant : %d\n", (frameIn.data[1] << 8) + frameIn.data[2]);
+          }
           break;
       }
     }
