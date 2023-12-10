@@ -8,6 +8,7 @@
   v 0.4 - 09/12/23 - Optimisation de la fonction 0xFE
   v 0.5 - 09/12/23 - Ajout de la reception de messages en provenance de la centrale LaBox.
                      Pour ce test, c'est la mesure de courant qui a été choisie
+  v 0.5.2 - 09/12/23                   
 */
 
 #ifndef ARDUINO_ARCH_ESP32
@@ -143,8 +144,14 @@ void recepCan(void *pvParameter) {
   CANMessage frameIn;
   while (1) {
     while (ACAN_ESP32::can.receive(frameIn)) {
-      //Serial.printf("Reception de la fonction : 0x%0X\n", (frameIn.id & 0x7F8) >> 3);
-      Serial.printf("Mesure de courant : %d\n", (frameIn.data[0] << 8) + frameIn.data[1]);
+     switch ((frameIn.id & 0x7F8) >> 3) {
+        case 0xFC:
+          Serial.printf("Mesure de courant : %d\n", (frameIn.data[0] << 8) + frameIn.data[1]);
+          break;
+        case 0xFB:
+          Serial.printf("Power %s\n", frameIn.data[0] ? "on" : "off");
+          break;
+      }
     }
     vTaskDelay(100 / portTICK_RATE_MS);
   }
@@ -158,7 +165,7 @@ void setup() {
   CanMsg::setup();
 
   // Exemple -> renseigner une adresse de locomotive valide
-  loco[0].address = 22;
+  loco[0].address = 34;
 
   xTaskCreatePinnedToCore(&recepCan, "recepCan", 2 * 1024, NULL, 5, NULL, 0);
 
